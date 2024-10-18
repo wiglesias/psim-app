@@ -106,4 +106,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
+
+    public static function createNewWithEmail(string $email): self
+    {
+        $user = new self();
+        $user->setEmail($email);
+
+        return $user;
+    }
 }
