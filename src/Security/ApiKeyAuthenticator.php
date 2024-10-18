@@ -2,6 +2,8 @@
 
 namespace App\Security;
 
+use App\Repository\UserRepository;
+use Doctrine\ORM\NoResultException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\SignatureInvalidException;
@@ -18,6 +20,11 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 class ApiKeyAuthenticator extends AbstractAuthenticator
 {
+    public function __construct(
+        private readonly UserRepository $userRepository,
+        private readonly string $jwtSecret,
+    ){}
+
     private const HEADER_NAME = 'Authorization';
     private const INVALID_AUTH_TOKEN_FORMAT_ERROR = 'Authorization header must be in Bearer JWT format.';
     /**
@@ -47,7 +54,7 @@ class ApiKeyAuthenticator extends AbstractAuthenticator
             throw new CustomUserMessageAuthenticationException(self::INVALID_AUTH_TOKEN_FORMAT_ERROR);
         }
 
-        $decoded = JWT::decode($jwt, new Key('example_key', 'HS256'));
+        $userEmail = $this->decodeJwt($jwt);
 
         return new SelfValidatingPassport(new UserBadge('xxx'));
     }
@@ -55,9 +62,16 @@ class ApiKeyAuthenticator extends AbstractAuthenticator
     public function decodeJwt(string $jwt): string
     {
         try {
-            $decoded = JWT::decode($jwt, new Key('example_key', 'HS256'));
+            $decoded = JWT::decode($jwt, new Key($this->jwtSecret, 'HS256'));
+
+            $user = $this->userRepository->findOneById($decoded->sub);
+
+
+            return $user->getEmail();
         } catch (SignatureInvalidException $exception) {
             throw new CustomUserMessageAuthenticationException('Failed to validate JWT');
+        } catch (NoResultException $exception) {
+            throw new CustomUserMessageAuthenticationException('User not found');
         }
     }
 
