@@ -20,18 +20,14 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 class ApiKeyAuthenticator extends AbstractAuthenticator
 {
-    public function __construct(
+    function __construct(
         private readonly UserRepository $userRepository,
         private readonly string $jwtSecret,
-    ){}
+    ) {}
 
     private const HEADER_NAME = 'Authorization';
-    private const INVALID_AUTH_TOKEN_FORMAT_ERROR = 'Authorization header must be in Bearer JWT format.';
-    /**
-     * Called on every request to decide if this authenticator should be
-     * used for the request. Returning `false` will cause this authenticator
-     * to be skipped.
-     */
+    private const INVALID_AUTH_TOKEN_FORMAT_ERROR = 'Authorization header must be in Bearer JWT format';
+
     public function supports(Request $request): ?bool
     {
         // "auth-token" is an example of a custom, non-standard HTTP header used in this application
@@ -48,7 +44,7 @@ class ApiKeyAuthenticator extends AbstractAuthenticator
         }
         [$type, $jwt] = explode(' ', $authorizationToken);
         if ($type !== 'Bearer') {
-            throw new CustomUserMessageAuthenticationException('Only Bearer API token is accepted');
+            throw new CustomUserMessageAuthenticationException('Only Bearer token is accepted');
         }
         if (!$jwt) {
             throw new CustomUserMessageAuthenticationException(self::INVALID_AUTH_TOKEN_FORMAT_ERROR);
@@ -56,16 +52,14 @@ class ApiKeyAuthenticator extends AbstractAuthenticator
 
         $userEmail = $this->decodeJwt($jwt);
 
-        return new SelfValidatingPassport(new UserBadge('xxx'));
+        return new SelfValidatingPassport(new UserBadge($userEmail));
     }
 
-    public function decodeJwt(string $jwt): string
-    {
+    private function decodeJwt(string $jwt): string {
         try {
             $decoded = JWT::decode($jwt, new Key($this->jwtSecret, 'HS256'));
 
             $user = $this->userRepository->findOneById($decoded->sub);
-
 
             return $user->getEmail();
         } catch (SignatureInvalidException $exception) {
