@@ -23,7 +23,7 @@ class ApiAuthController extends AbstractController
     ): JsonResponse
     {
         $payload = $request->getPayload();
-        $email = $request->request->get('email');
+        $email = $payload->get('email');
         $plainPassword = $payload->get('password');
 
         $user = User::createNewWithEmail($email);
@@ -41,23 +41,23 @@ class ApiAuthController extends AbstractController
     }
 
     #[Route('/api/auth/login', name: 'api_auth_login', methods: ['POST'])]
-    public function login(string $jwtSecret): JsonResponse
-    {
+    public function login(string $jwtSecret): JsonResponse {
         $user = $this->getUser();
         if (!$user instanceof User) {
-            throw new \Exception('Invalid user type.');
+            throw new \Exception('Invalid user type');
         }
 
         $payload = [
             'iat' => time(),
             'exp' => time() + 3600 * 24,
-            'nbf' => $user->getId()
+            'sub' => $user->getId()
         ];
+
 
         return new JsonResponse(
             [
-                'token' => JWT::encode($payload, $jwtSecret, 'HS256'),
-            ]
+                'token' => JWT::encode($payload, $jwtSecret, 'HS256')
+            ],
         );
     }
 }
