@@ -36,7 +36,7 @@ final class Organization
         return $this->name;
     }
 
-    public function setName(string $name): static
+    public function setName(string $name): self
     {
         $this->name = $name;
 
@@ -48,7 +48,7 @@ final class Organization
         return $this->owner;
     }
 
-    public function setOwner(User $owner): static
+    public function setOwner(User $owner): self
     {
         $this->owner = $owner;
 

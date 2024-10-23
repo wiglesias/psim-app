@@ -16,6 +16,25 @@ class MembershipRepository extends ServiceEntityRepository
         parent::__construct($registry, Membership::class);
     }
 
+    public function save(Membership $membership): void
+    {
+        $this->getEntityManager()->persist($membership);
+        $this->getEntityManager()->flush();
+    }
+
+    public function findOneByOrganizationAndUserId(string $organizationId, string $userId): Membership | null
+    {
+        return $this->createQueryBuilder('m')
+            ->select('m')
+            ->addSelect('o')
+            ->join('m.organization', 'o')
+            ->where('m.organization = :organizationId AND m.user = :userId')
+            ->setParameter('organizationId', $organizationId)
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getSingleResult();
+    }
+
     //    /**
     //     * @return Membership[] Returns an array of Membership objects
     //     */
