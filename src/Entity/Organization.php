@@ -6,7 +6,7 @@ use App\Repository\OrganizationRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OrganizationRepository::class)]
-class Organization
+final class Organization
 {
     public function __construct(string $name, User $owner)
     {
