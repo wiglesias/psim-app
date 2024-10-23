@@ -16,6 +16,20 @@ class OrganizationRepository extends ServiceEntityRepository
         parent::__construct($registry, Organization::class);
     }
 
+    public function findForUser(int $userId)
+    {
+        /** @var Organization[] $organizations */
+        $organizations = $this->findBy(['owner' => $userId]);
+
+        return $organizations;
+    }
+
+    public function save(Organization $organization): void
+    {
+        $this->getEntityManager()->persist($organization);
+        $this->getEntityManager()->flush();
+    }
+
     //    /**
     //     * @return Organization[] Returns an array of Organization objects
     //     */

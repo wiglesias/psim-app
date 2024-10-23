@@ -3,13 +3,16 @@
 namespace App\Entity;
 
 use App\Repository\MembershipRepository;
+use App\Value\MembershipRole;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MembershipRepository::class)]
 #[ORM\UniqueConstraint(name: 'memberships_org_user_id_uniq', columns: ['organization_id', 'user_id'])]
 final class Membership
 {
-    public function __construct(Organization $organization, User $user, Membership $role)
+    public const ROLE_ADMIN = 'admin';
+
+    public function __construct(Organization $organization, User $user, MembershipRole $role)
     {
         $this->organization = $organization;
         $this->user = $user;
@@ -22,7 +25,7 @@ final class Membership
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private Membership $role;
+    private MembershipRole $role;
 
     #[ORM\ManyToOne(targetEntity: 'User', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
@@ -37,12 +40,12 @@ final class Membership
         return $this->id;
     }
 
-    public function getRole(): Membership
+    public function getRole(): MembershipRole
     {
         return $this->role;
     }
 
-    public function setRole(Membership $role): self
+    public function setRole(MembershipRole $role): self
     {
         $this->role = $role;
 
