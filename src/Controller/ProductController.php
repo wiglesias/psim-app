@@ -14,7 +14,25 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/product')]
 class ProductController extends AbstractController
 {
-    #[Route('', name: 'app_product', methods: ['POST'])]
+    #[Route('', name: 'product_list', methods: ['GET'])]
+    public function listProducts(
+        Request $request,
+        OrganizationAccessChecker $organizationAccessChecker,
+        ProductRepository $productRepository,
+    ): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $membership = $organizationAccessChecker->checkAccess($request, $user);
+        $products = $productRepository->findByOrganization($membership->getOrganization());
+
+        return new JsonResponse([
+            'products' => array_map(fn (Product $product) => ['id' => $product->getId(), 'name' => $product->getName()], $products)
+        ]);
+    }
+
+    #[Route('', name: 'product_create', methods: ['POST'])]
     public function createProduct(
         Request $request,
         OrganizationAccessChecker $organizationAccessChecker,

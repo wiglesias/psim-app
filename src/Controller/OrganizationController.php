@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('api/organization')]
+#[Route('/api/organization')]
 class OrganizationController extends AbstractController
 {
     #[Route('', name: 'organization_list_mine', methods: ['GET'])]
@@ -31,7 +31,7 @@ class OrganizationController extends AbstractController
         ]);
     }
 
-    #[Route('/organization', name: 'app_organization')]
+    #[Route('', name: 'organization_create', methods: ['POST'])]
     public function create(
         Request $request,
         MembershipRepository $membershipRepository): JsonResponse
